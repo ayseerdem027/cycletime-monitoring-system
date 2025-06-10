@@ -1,0 +1,62 @@
+services:
+  influxdb2:
+    image: influxdb:2
+    ports:
+      - ${DOCKER_INFLUXDB_INIT_PORT}:8086
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: "${DOCKER_INFLUXDB_INIT_USERNAME}"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "${DOCKER_INFLUXDB_INIT_PASSWORD}"
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}"
+      DOCKER_INFLUXDB_INIT_ORG: Hilti
+      DOCKER_INFLUXDB_INIT_BUCKET: home
+
+    volumes:
+      - type: volume
+        source: influxdb2-data
+        target: /var/lib/influxdb2
+      - type: volume
+        source: influxdb2-config
+        target: /etc/influxdb2
+    
+  grafana:
+    image: grafana/grafana-oss:10.4.1
+    volumes:
+      - grafana-storage:/var/lib/grafana:rw
+      - ${GRAFANA_CFG_PATH}:/etc/grafana/grafana.ini:rw
+    depends_on:
+      - influxdb2
+    ports:
+      - ${GRAFANA_PORT}:3000
+    restart : always
+
+  python_app:
+    build: 
+      context: ./ProcessData
+      dockerfile: Dockerfile.python
+    image: python_app
+    restart: always
+
+  python_app_cycletime:
+    build: 
+      context: ./cycleTime
+      dockerfile: Dockerfile.pythonCycleTime
+    image: python_app_cycletime
+    restart: always
+
+  python_app_filtered_cycletime:
+    build: 
+      context: ./filtered_cycleTime
+      dockerfile: Dockerfile.pythonFilteredCycleTime
+    image: python_app_filtered_cycletime
+    volumes:
+      - "/Users/erdeays/Downloads/cycleTime_Assembly/cycleTime:/shared_data:rw"
+    depends_on:
+      - python_app_cycletime
+
+
+volumes:
+  influxdb2-data:
+  influxdb2-config:
+  grafana-storage:
+  shared_data:

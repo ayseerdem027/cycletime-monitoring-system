@@ -1,0 +1,13 @@
+# Use the official Python image as a base image
+FROM python:3.9
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy directory contents into /app
+COPY Main.py Influxhandler.py EPHandler.py .env sensors.py watchdog.py EPManager.py time_difference_calc.py test_EPHandler.py test_EPManager.py test_Influxhandler.py test_Main.py test_time_difference_calc.py /app/
+
+RUN pip install --trusted-host=pypi.python.org --trusted-host=pypi.org --trusted-host=files.pythonhosted.org opcua influxdb-client elementpath cryptography pytz load_dotenv 
+
+CMD ["python", "watchdog.py"]
+

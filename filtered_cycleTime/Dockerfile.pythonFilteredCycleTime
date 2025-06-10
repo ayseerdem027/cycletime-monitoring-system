@@ -1,0 +1,10 @@
+
+FROM python:3.9
+
+WORKDIR /app
+
+COPY filtering_rawData.py .env test_filtering_rawData.py /app/
+
+RUN pip install --trusted-host=pypi.python.org --trusted-host=pypi.org --trusted-host=files.pythonhosted.org influxdb-client pytz load_dotenv pandas datetime 
+
+CMD ["python", "filtering_rawData.py"]
